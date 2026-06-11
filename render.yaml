@@ -1,0 +1,35 @@
+# Render Blueprint - Deploy configuration
+# https://docs.render.com/blueprint-spec
+
+services:
+  # ── Backend (NestJS) ─────────────────────────────────
+  - type: web
+    name: leadpulse-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+    healthCheckPath: /
+
+  # ── Frontend (Next.js Static Site) ───────────────────
+  - type: web
+    name: leadpulse-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: out
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
